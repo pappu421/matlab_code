@@ -125,10 +125,7 @@ if n>m
     
     %clculate objective function
      
-    fx = zeros(1,size(s,4));
-    for i=1:size(s,1)
-        fx(i,:) = sum(s(i,:)*C);
-    end
+      fx = s *c ;
 end   
     kt = [s fx]
        
