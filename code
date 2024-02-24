@@ -67,7 +67,7 @@ end
 
 ptt=pt';
 
-%Write all the points that may make feasible region 
+%Write all the points that may make or may not make the feasible region 
 
 aapt = [ptt ; points];
 poin = unique(aapt , 'rows');
