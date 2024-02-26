@@ -1,5 +1,3 @@
-%%graphical
-
 clc;
 
 A = [ 1 2
@@ -40,78 +38,77 @@ px  = find (x == 0);  % always 1
 % , because the index of 0 in x is 1 as mostly it is  
 
 
-%finding the corner points 
+line1 = [x(:,[px,py1]) ; y1(:,[px,py1])]';
+line2 = [x(:,[px,py2]) ; y2(:,[px,py2])]';
+line3 = [x(:,[px,py3]) ; y3(:,[px,py3])]';
 
-line1 = [x(:,[py1 , px]) ; y1(:,[py1 , px])]'
-line2 = [x(:,[py2 , px]) ; y2(:,[py2 , px])]'
-line3 = [x(:,[py3 , px]) ; y3(:,[py3 , px])]'
-
-points = unique([line1;line2;line3],'rows')
+points = unique([line1 ; line2 ; line3],'rows');
 
 
- %finding the intersecting points 
-
-pt = [0 ; 0];
+pt = [0;0];
 for i=1:size(A,1)
-     A1 = A(i,:);
-     B1 = B(i,:);
-     for j=i+1:size(A,1)
+    A1=A(i,:);
+    B1=B(i,:);
+    for j= i+1:size(A,1)
         A2 = A(j,:);
         B2 = B(j,:);
-        Anew=[A1;A2];
-        Bnew=[B1;B2];
+        Anew = [A1 ; A2];
+        Bnew = [B1 ; B2];
         X = Anew\Bnew;
-        pt = [X  pt];
-     end
+        pt = [pt  X];
+    end
+end
+ptt = pt';
+
+allpoints = [points ; ptt];
+allpo = unique(allpoints,'rows');
+
+
+All = untitled_constraintss(allpo);
+All = unique(All,'rows')
+
+%objective function 
+
+for i=1:size(All,1)
+    FX(i,:) = sum(All(i,:) * C);
 end
 
-ptt=pt';
+[Zmax , Zind] = max(FX);
 
-%Write all the points that may make feasible region 
+sol = [All(Zind,:) Zmax]
 
-aapt = [ptt ; points];
-poin = unique(aapt , 'rows');
-
-
-%select the points that actually making region 
-ATT = constraintss(poin); 
-ATT = unique(ATT , "rows");
-
-% obj value 
-
-for i=1:size(ATT,1)
-    FX(i,:) = sum(ATT(i,:) * C);
-end
-
-%printing soluton 
-k=[ATT FX]
 
             
 %% constraintss file of graphical (file name should be same as function name)
 
-function out  = constraintss(X) 
-    X1 = X(:,1);
-    X2 = X(:,2);
-    cons1 = X1 + 2*X2 - 2000;
-    T= find(cons1>0);
-    X(T,:) = [];
-
-    X1 = X(:,1);
-    X2 = X(:,2);
-    cons2 = X1 + X2 - 1500;
-    T= find(cons2>0);
-    X(T,:) = [];
+function o = untitled_constraintss(X)
 
 
+%ist constraint
+X1 = X(:,1);
+X2 = X(:,2);
 
-    X1 = X(:,1);
-    X2 = X(:,2);
-    cons3 = X1 + 2*X2 - 2000;
-    T= find(cons3>0);
-    X(T,:) = [];
+cons1 = X1 + 2*X2 - 2000;
+T1 = find(cons1>0);
+X(T1,:)  = [];
 
-    out = X;
+%Sec constraint
+X1 = X(:,1);
+X2 = X(:,2);
 
+cons2 = X1 + X2 - 1500;
+T2= find(cons2>0);
+X(T2,:)  = [];
+
+%third constraint
+X1 = X(:,1);
+X2 = X(:,2);
+
+cons3 = X1 + 2*X2 - 2000;
+T3= find(cons3>0);
+X(T3,:)  = [];
+
+o = X;
 end
 
 
@@ -125,48 +122,39 @@ end
 
 
 %% basic feasible 
-%matices
+%matrices 
+
 A = [ 2  3  -1  4 ; 1 -2   6 -7 ];
 
 B = [8 -3]';
+
 C = [2 3 4 7]';
 
-%number of variable and constraints
-n = size(A,2);   % length of second dimension
-m = size(A,1);   % length of ist dimension 
+n = size(A,2);  %no. of variables
+m = size(A,1);  %no. of equations
 
-%checking condition 
-if n>m
-    
-    % combinations of variables
 
-    % this will give no. of ways not ways 
-    no = nchoosek(n , m);
+no = nchoosek(n,m);
+ncm = nchoosek(1:n,m);
 
-    %indices of the combination  
-    ncm = nchoosek(1:n, m);
+s = zeros(1,size(A ,2));
+for i=1:no
+    y = zeros(1,n);
+    X = A(:,ncm(i,:))\B;
 
-    s = zeros(1,size(A,2));
-    for i=1:no 
-        y = zeros(n,1);
-        X = A(:,ncm(i,:))\B;
-        
-        %check feasiblility
-        if all(X>0)
-
-            y(ncm(i,:)) = X;
-            s  = [s ; y'];
-
-        end
-
+    if all(X>=0 & X~=inf & X~=-inf)
+        y(ncm(i,:)) =  X;
+        s = [s ; y];
     end
-end  
+end
 
-%clculate objective function
 fx = s * C;
+[Zmax , Zind] = max(fx');
 
-%write solutions 
-kt = [s fx]
+%optimal solution
+solution = [s(Zind,:) Zmax]
+
+
 
     
 
